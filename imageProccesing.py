@@ -4,8 +4,8 @@ from PIL import Image
 import pandas as pd
 import shutil
 
-path = "./static/uploads"
-dossiers = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
+# path = "./uploads"
+# dossiers = [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
 
 models = [
   "VGG-Face", 

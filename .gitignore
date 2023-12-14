@@ -1,3 +1,5 @@
 Faces
-static/uploads
+static
 __pycache__
+uploads
+db.json
