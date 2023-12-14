@@ -2,6 +2,9 @@ from flask import Flask, request, redirect, url_for, jsonify, render_template
 from werkzeug.utils import secure_filename
 import os
 import imageProccesing
+import uuid
+import shutil
+
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static/uploads/'
@@ -14,12 +17,21 @@ def galerie():
             filename = secure_filename(image_file.filename)
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             image_file.save(file_path)
-            
-            if not imageProccesing.reconnaissance(file_path):
-                return jsonify({"requestName": True, "filename": filename})
-            else:
+            recognition = imageProccesing.reconnaissance(file_path)
+
+            if recognition == 0:
+                unique_filename = str(uuid.uuid4()) + os.path.splitext(filename)[1]
+                unique_folder = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename.split('.')[0])
+                os.makedirs(unique_folder, exist_ok=True)
+
+                shutil.copy(file_path, os.path.join(unique_folder, unique_filename))
+
                 return redirect('/')
-    
+            else :
+                recognition
+                recog_path= os.path.dirname(recognition)
+                shutil.copy(file_path, os.path.join(recog_path, unique_filename))
+
     images = os.listdir(app.config['UPLOAD_FOLDER'])
     images = [os.path.join('/static/uploads/', file) for file in images]
     return render_template('galerie.html', images=images)
@@ -41,4 +53,4 @@ def submit_name():
     return redirect('/')
 
 if __name__ == '__main__':
-    app.run(debug=True, port=25396)
+    app.run(debug=True, port=5002)

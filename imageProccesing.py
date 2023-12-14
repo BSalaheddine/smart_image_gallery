@@ -20,12 +20,20 @@ models = [
 ]
 
 
-# dfs = DeepFace.find(img_path = "C:/Users/User/Desktop/image gallery/a.png", db_path = "C:/Users/User/Desktop/image gallery/Faces/Brad Pitt", model_name=models[2])
+# dfs = DeepFace.find(img_path = "C:/Users/User/Desktop/image gallery/a.png", db_path = "C:/Users/User/Desktop/smart_image_gallery/Faces", model_name=models[2], enforce_detection=False)
 
-# print(dfs)
+# # print(type(dfs[0]))
+
+# df = dfs[0]
+
+# # print(df.loc[dfs[0][dfs[0]['Facenet512_cosine'] > 0.1]['identity'].first_valid_index(), 'identity'])
+# print(len(dfs[0][dfs[0]['Facenet512_cosine'] > 0.4]['identity']))
+
 
 
 def reconnaissance(img):
   dfs = DeepFace.find(img_path = img, db_path = "./Faces/", model_name=models[2], enforce_detection=False)
-  if dfs[0].shape[0] == 0:
-    return False
+  if len(dfs[0][dfs[0]['Facenet512_cosine'] > 0.4]['identity']) == 0:
+    return 0
+  else:
+    return dfs[0].loc[dfs[0][dfs[0]['Facenet512_cosine'] > 0.4]['identity'].first_valid_index(), 'identity']
