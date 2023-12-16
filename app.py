@@ -246,5 +246,22 @@ def add_custom_label(image_filename):
     # Redirect back to the image details page
     return redirect(url_for('display_image', image_filename=image_filename))
 
+@app.route('/rename_tag/<label>', methods=['POST'])
+def rename_tag(label):
+    new_tag_name = request.form.get('new_tag_name')
+
+    # Ensure the new tag name is not empty
+    if new_tag_name:
+
+        with open(DB_FILE_PATH, 'r') as file:
+            content = file.read()
+            modified_content = content.replace(label, new_tag_name)
+        
+        with open(DB_FILE_PATH, 'w') as file:
+            file.write(modified_content)
+
+    # Redirect back to the filtered images page
+    return redirect(url_for('filter_by_label', label=new_tag_name))
+
 if __name__ == '__main__':
     app.run(debug=True)

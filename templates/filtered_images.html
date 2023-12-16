@@ -8,6 +8,11 @@
 </head>
 <body>
     <h1>Images with Label: {{ label }}</h1>
+    <form method="post" action="{{ url_for('rename_tag', label=label) }}">
+        <label for="new_tag_name">Rename Tag:</label>
+        <input type="text" name="new_tag_name" id="new_tag_name" required>
+        <button type="submit">Rename</button>
+    </form>
 
     <!-- Display the filtered images -->
     {% for filename in image_files %}
