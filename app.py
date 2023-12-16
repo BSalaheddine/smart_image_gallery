@@ -45,12 +45,9 @@ def galerie():
             new_file_path = os.path.join(app.config['UPLOAD_FOLDER'], new_filename)
 
             if recognition == 0:
-                unique_folder = os.path.join(app.config['UPLOAD_FOLDER'], new_filename.split('.')[0])
-                os.makedirs(unique_folder, exist_ok=True)
-                shutil.move(file_path, os.path.join(unique_folder, new_filename))
+                pass
             else:
                 recog_path = os.path.dirname(recognition)
-                shutil.move(file_path, os.path.join(recog_path, new_filename))
 
             update_json_file(json_file_path, new_filename, new_file_path)
         return redirect('/')
