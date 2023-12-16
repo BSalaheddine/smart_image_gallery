@@ -189,5 +189,33 @@ def display_image(image_filename):
     displayed_image = "tmp_image" + file_extension
     return render_template('image.html', displayed_image = displayed_image, image_filename=image_filename, image_data=image_data, border_colors=border_colors)
 
+# ...
+
+@app.route('/filter/<label>')
+def filter_by_label(label):
+    # Get a list of images with the specified label
+    data = get_all_data()
+    if label in data['tags']['humans']:
+        filtered_images = data['tags']['humans'][label]
+
+    # Pagination logic (you can adjust this based on your needs)
+    page = request.args.get('page', 1, type=int)
+    items_per_page = 40  # 8 columns * 5 rows
+    start = (page - 1) * items_per_page
+    end = start + items_per_page
+    paginated_files = filtered_images[start:end]
+
+    # Calculate total pages
+    total_pages = (len(filtered_images) + items_per_page - 1) // items_per_page
+
+    return render_template('filtered_images.html', image_files=paginated_files, label=label, page=page, total_pages=total_pages)
+
+def get_all_data():
+    # Read the existing data from the JSON file
+    with open(DB_FILE_PATH, 'r') as json_file:
+        data = json.load(json_file)
+
+    return data
+
 if __name__ == '__main__':
     app.run(debug=True)

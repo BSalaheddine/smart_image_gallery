@@ -12,6 +12,11 @@
             display: inline-block;
             font-size: 14px;
         }
+        .label-link {
+            cursor: pointer;
+            color: blue;
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -22,7 +27,8 @@
     {% if image_data.humans %}
         <h2>Face Tags:</h2>
         {% for i in range(image_data.humans|length) %}
-        <div class="tag" style="border-color: rgb({{ border_colors[i]|join(',') }});">{{ image_data.humans[i].name }}</div>
+            {% set label_name = image_data.humans[i].name %}
+            <div class="tag" style="border-color: rgb({{ border_colors[i]|join(',') }});"><a class="label-link" href="{{ url_for('filter_by_label', label=label_name) }}">{{ label_name }}</a></div>
         {% endfor %}
     {% endif %}
 </body>

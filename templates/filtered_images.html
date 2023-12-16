@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filtered Images - {{ label }}</title>
+    <!-- Your other head content -->
+</head>
+<body>
+    <h1>Images with Label: {{ label }}</h1>
+
+    <!-- Display the filtered images -->
+    {% for filename in image_files %}
+        <img src="{{ url_for('static', filename='uploads/' + filename) }}" alt="{{ filename }}">
+    {% endfor %}
+
+    <!-- Pagination links (you can adjust this based on your needs) -->
+    {% if page > 1 %}
+        <a href="{{ url_for('filter_by_label', label=label, page=page-1) }}">Previous</a>
+    {% endif %}
+    {% if page < total_pages %}
+        <a href="{{ url_for('filter_by_label', label=label, page=page+1) }}">Next</a>
+    {% endif %}
+</body>
+</html>
