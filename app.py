@@ -49,7 +49,8 @@ def add_colored_box(filename, humans_data):
         draw.rectangle(box_coordinates, outline=border_color, width=2)
 
     # Save the modified image to the specified file location
-    img.save(os.path.join(app.config['TMP_FOLDER'], "tmp_image.jpg"))
+    _, file_extension = os.path.splitext(file_path)
+    img.save(os.path.join(app.config['TMP_FOLDER'], "tmp_image")+file_extension)
     return border_colors
 
 def get_image_data(image_filename):
@@ -65,7 +66,6 @@ def get_image_data(image_filename):
 def extract_faces(filename):
     # Extract faces
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    faces = DeepFace.extract_faces(file_path, enforce_detection=False)
 
     # Read json
     with open(DB_FILE_PATH, 'r') as json_file:
@@ -78,54 +78,58 @@ def extract_faces(filename):
         "custom_tags": []
     }
     
-    for face in faces:
-        face_filename = generate_random_filename('face.jpg')
-        tmp_face_path = os.path.join(app.config['TMP_UPLOAD'], face_filename)
-        face_path = os.path.join(app.config['FACES_FOLDER'], face_filename)
-        
-        facial_area = face['facial_area']
-        x, y, w, h = facial_area['x'], facial_area['y'], facial_area['w'], facial_area['h']
-
-        # Save cropped face image
-        image = cv2.imread(file_path)
-        # to crop not too much (makes the recognition model less performant)
-        a, b, c, d = max(0,x-w//2), min(image.shape[1],x+w+w//2), max(0,y-h//2), min(image.shape[1],y+h+h//2)
-        new_x, new_y, new_w, new_h = a, c, b-a, d-c
-        cropped_image = image[new_y:new_y+new_h, new_x:new_x+new_w]
-        cv2.imwrite(tmp_face_path, cropped_image)
-
-        found = False
-        for file in os.listdir(app.config['FACES_FOLDER']):
-            result = DeepFace.verify(tmp_face_path, os.path.join(app.config['FACES_FOLDER'], file), model_name="Facenet512", detector_backend="retinaface", enforce_detection=False)
-            if result['verified']:
-                found = True
-                other_face = file
-                break
-        
-        shutil.move(tmp_face_path, face_path)
-        
-        if found:
-            human = data['faces'][other_face]['human']
-            # Add face to existing tag in json
-            data['tags']['humans'][human].append(filename)
-        else:
-            human = str(uuid.uuid4())
-            # Add new tag in json
-            data['tags']['humans'][human] = [filename]
+    try:
+        faces = DeepFace.extract_faces(file_path, detector_backend="retinaface")
+        for face in faces:
+            face_filename = generate_random_filename('face.jpg')
+            tmp_face_path = os.path.join(app.config['TMP_UPLOAD'], face_filename)
+            face_path = os.path.join(app.config['FACES_FOLDER'], face_filename)
             
+            facial_area = face['facial_area']
+            x, y, w, h = facial_area['x'], facial_area['y'], facial_area['w'], facial_area['h']
 
-        # Add face to image in json
-        data['images'][filename]["humans"].append({
-            "name": human,
-            "facial_area": facial_area,
-            "face": face_filename
-        })
+            # Save cropped face image
+            image = cv2.imread(file_path)
+            # to crop not too much (makes the recognition model less performant)
+            a, b, c, d = max(0,x-w//2), min(image.shape[1],x+w+w//2), max(0,y-h//2), min(image.shape[1],y+h+h//2)
+            new_x, new_y, new_w, new_h = a, c, b-a, d-c
+            cropped_image = image[new_y:new_y+new_h, new_x:new_x+new_w]
+            cv2.imwrite(tmp_face_path, cropped_image)
 
-        # Add face in json
-        data['faces'][face_filename] = {
-            "from_picture": filename,
-            "human": human
-        }
+            found = False
+            for file in os.listdir(app.config['FACES_FOLDER']):
+                result = DeepFace.verify(tmp_face_path, os.path.join(app.config['FACES_FOLDER'], file), model_name="Facenet512", detector_backend="retinaface", enforce_detection=False)
+                if result['verified']:
+                    found = True
+                    other_face = file
+                    break
+            
+            shutil.move(tmp_face_path, face_path)
+            
+            if found:
+                human = data['faces'][other_face]['human']
+                # Add face to existing tag in json
+                data['tags']['humans'][human].append(filename)
+            else:
+                human = str(uuid.uuid4())
+                # Add new tag in json
+                data['tags']['humans'][human] = [filename]
+                
+
+            # Add face to image in json
+            data['images'][filename]["humans"].append({
+                "name": human,
+                "facial_area": facial_area,
+                "face": face_filename
+            })
+
+            # Add face in json
+            data['faces'][face_filename] = {
+                "from_picture": filename,
+                "human": human
+            }
+    except:
+        pass
 
     # Write json
     with open(DB_FILE_PATH, 'w') as json_file:
@@ -181,7 +185,9 @@ def display_image(image_filename):
     border_colors = add_colored_box(image_filename, image_data['humans'])
 
     # Render the image display template
-    return render_template('image.html', image_filename=image_filename, image_data=image_data, border_colors=border_colors)
+    _, file_extension = os.path.splitext(image_filename)
+    displayed_image = "tmp_image" + file_extension
+    return render_template('image.html', displayed_image = displayed_image, image_filename=image_filename, image_data=image_data, border_colors=border_colors)
 
 if __name__ == '__main__':
     app.run(debug=True)
