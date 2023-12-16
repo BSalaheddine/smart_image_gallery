@@ -7,6 +7,7 @@ import cv2
 from PIL import Image, ImageDraw
 import random
 import shutil
+from flask import request
 
 app = Flask(__name__)
 
@@ -197,6 +198,10 @@ def filter_by_label(label):
     data = get_all_data()
     if label in data['tags']['humans']:
         filtered_images = data['tags']['humans'][label]
+    elif label in data['tags']['animals']:
+        filtered_images = data['tags']['animals'][label]
+    elif label in data['tags']['custom_tags']:
+        filtered_images = data['tags']['custom_tags'][label]
 
     # Pagination logic (you can adjust this based on your needs)
     page = request.args.get('page', 1, type=int)
@@ -216,6 +221,30 @@ def get_all_data():
         data = json.load(json_file)
 
     return data
+
+@app.route('/add_custom_label/<image_filename>', methods=['POST'])
+def add_custom_label(image_filename):
+    custom_label = request.form.get('custom_label')
+
+    # Ensure the custom label is not empty
+    if custom_label:
+        # Get existing data from the JSON file
+        data = get_all_data()
+
+        # Check if the image exists in the database
+        if image_filename in data['images']:
+            # Add the custom label to the image's custom_tags
+            data['images'][image_filename]['custom_tags'].append(custom_label)
+
+            # Add the custom label to the overall custom_tags in tags
+            data['tags']['custom_tags'].setdefault(custom_label, []).append(image_filename)
+
+            # Write the updated data back to the JSON file
+            with open(DB_FILE_PATH, 'w') as json_file:
+                json.dump(data, json_file, indent=2)
+
+    # Redirect back to the image details page
+    return redirect(url_for('display_image', image_filename=image_filename))
 
 if __name__ == '__main__':
     app.run(debug=True)
