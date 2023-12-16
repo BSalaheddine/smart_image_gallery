@@ -1,5 +1,9 @@
 {
-    "name": "9.jpg",
-    "path": "static/uploads/9.jpg",
-    "tags": []
-}
+    "images": {},
+    "faces": {},
+    "tags": {
+      "humans": {},
+      "animals": {},
+      "custom_tags": {}
+    }
+  }

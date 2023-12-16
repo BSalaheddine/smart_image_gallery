@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image</title>
+    <style>
+        .tag {
+            border: 2px solid;
+            padding: 4px;
+            margin: 2px;
+            display: inline-block;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Image: {{ image_filename }}</h1>
+
+    <img src="{{ url_for('static', filename='tmp_image/' + 'tmp_image.jpg') }}" alt="Image">
+
+    {% if image_data.humans %}
+        <h2>Face Tags:</h2>
+        {% for i in range(image_data.humans|length) %}
+        <div class="tag" style="border-color: rgb({{ border_colors[i]|join(',') }});">{{ image_data.humans[i].name }}</div>
+        {% endfor %}
+    {% endif %}
+</body>
+</html>

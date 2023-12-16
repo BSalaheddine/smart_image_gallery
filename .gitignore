@@ -1,3 +1,5 @@
-Faces
-static
 __pycache__
+static/faces
+static/tmp_image
+static/tmp_upload
+static/uploads
