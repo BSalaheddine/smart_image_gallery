@@ -1,7 +1,7 @@
 from flask import Flask, request, redirect, url_for, jsonify, render_template
 from werkzeug.utils import secure_filename
 import os
-import imageProccesing
+import imageProccesing as imageProccesing
 import shutil
 import json
 
@@ -19,14 +19,33 @@ def get_next_image_number(json_file_path):
     except (FileNotFoundError, json.JSONDecodeError, KeyError, ValueError):
         return 1
 
-def update_json_file(json_file_path, new_image_name, new_image_path):
-    new_data = {
-        'name': new_image_name,
-        'path': new_image_path,
-        'tags': []
-    }
-    with open(json_file_path, 'w') as file:
-        json.dump(new_data, file, indent=4)
+def update_json_file(json_file_path, new_image_name, new_image_path, tag=None):
+    try:
+        with open(json_file_path, 'r+') as file:
+            data = json.load(file)
+            if tag:  # If a tag is provided, append it to the tags list for the image
+                for image in data:
+                    if image['name'] == new_image_name:
+                        image['tags'].append(tag)
+                        break
+            else:  # If no tag, add the new image to the database
+                data.append({
+                    'name': new_image_name,
+                    'path': new_image_path,
+                    'tags': []
+                })
+            file.seek(0)  # Reset file position to the beginning.
+            json.dump(data, file, indent=4)
+            file.truncate()  # Remove any remaining data from the old content.
+    except (FileNotFoundError, json.JSONDecodeError):
+        # If the file does not exist or is empty/invalid, create a new list
+        data = [{
+            'name': new_image_name,
+            'path': new_image_path,
+            'tags': []
+        }]
+        with open(json_file_path, 'w') as file:
+            json.dump(data, file, indent=4)
 
 @app.route('/', methods=['GET', 'POST'])
 def galerie():
@@ -56,6 +75,19 @@ def galerie():
     images = [os.path.join('static/uploads/', file) for file in images]
 
     return render_template('galerie.html', images=images)
+
+
+@app.route('/add-tag', methods=['POST'])
+def add_tag():
+    tag = request.form['tag']
+    image_name = request.form['image']
+    json_file_path = 'db.json'
+    
+    if tag and image_name:
+        update_json_file(json_file_path, image_name, None, tag)
+        return jsonify({'status': 'success'})
+    else:
+        return jsonify({'status': 'failure'}), 400
 
 # @app.route('/', methods=['GET', 'POST'])
 # def galerie():

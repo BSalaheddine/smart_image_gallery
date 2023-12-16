@@ -39,8 +39,16 @@
     <h1>Galerie d'Images</h1>
     <div class="gallery">
         {% for image_path in images %}
-        <img src="{{ image_path }}" alt="Image">
+        <!-- Wrap the image in a div and add an onclick handler -->
+        <div class="image-container" data-image="{{ image_path }}" onclick="addTag(this)">
+            <img src="{{ image_path }}" alt="Image">
+        </div>
         {% endfor %}
+
+        <!-- {% for image_path in images %}
+        <img src="{{ image_path }}" alt="Image">
+        {% endfor %} -->
+
     </div>
 
     <form method="post" enctype="multipart/form-data">
@@ -54,33 +62,31 @@
     </form>
     
     <script>
-    function handleImageUpload() {
-        var imageFile = document.querySelector('#fileInput').files[0];
-        var formData = new FormData();
-        formData.append('file', imageFile);
+        // Function to handle adding a tag
+        function addTag(imageContainerElement) {
+            var imageSrc = imageContainerElement.getAttribute('data-image');
+            var tag = prompt("Please enter a tag for this image:");
+            if (tag) {
+                var formData = new FormData();
+                formData.append('tag', tag);
+                formData.append('image', imageSrc);
     
-        fetch('/', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.requestName) {
-                var userName = prompt("La reconnaissance d'image a échoué. Veuillez entrer votre nom :");
-                if (userName) {
-                    document.querySelector('#nameInput').value = userName;
-                    document.querySelector('#filenameInput').value = data.filename;
-                    document.querySelector('#nameForm').submit();
-                }
-            } else {
-                window.location.reload();
+                fetch('/add-tag', { // Change '/add-tag' to the URL that will handle the tag addition
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Handle the response. E.g., update the page to show the new tag.
+                    alert('Tag added successfully!');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to add tag.');
+                });
             }
-        })
-        .catch(error => console.error('Error:', error));
-    }
-    
-    document.querySelector('#uploadButton').addEventListener('click', handleImageUpload);
-    </script>
+        }
+        </script>
 </body>
 
 </html>

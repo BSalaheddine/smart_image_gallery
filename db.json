@@ -1,5 +1,7 @@
-{
-    "name": "9.jpg",
-    "path": "static/uploads/9.jpg",
-    "tags": []
-}
+[
+    {
+        "name": "static/uploads/4.jpg",
+        "path": null,
+        "tags": []
+    }
+]
