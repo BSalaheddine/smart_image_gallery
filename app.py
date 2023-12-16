@@ -7,7 +7,7 @@ import json
 
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'uploads/'
+app.config['UPLOAD_FOLDER'] = 'static/uploads/'
 
 def get_next_image_number(json_file_path):
     try:
@@ -55,16 +55,10 @@ def galerie():
             update_json_file(json_file_path, new_filename, new_file_path)
         return redirect('/')
 
-    image_paths = []
-    for root, dirs, files in os.walk(app.config['UPLOAD_FOLDER']):
-        for dir in dirs:
-            dir_path = os.path.join(root, dir)
-            for image in os.listdir(dir_path):
-                image_path = os.path.join(dir_path, image)
-                rel_path = os.path.relpath(image_path, 'static')
-                image_paths.append(rel_path.replace(os.sep, '/'))
+    images = os.listdir(app.config['UPLOAD_FOLDER'])
+    images = [os.path.join('static/uploads/', file) for file in images]
 
-        return render_template('galerie.html', images=image_paths)
+    return render_template('galerie.html', images=images)
 
 # @app.route('/', methods=['GET', 'POST'])
 # def galerie():
