@@ -8,6 +8,11 @@ from PIL import Image, ImageDraw
 import random
 import shutil
 from flask import request
+from PIL import Image
+from ultralytics import YOLO
+
+# Load a pretrained YOLOv8n model
+model = YOLO('best.pt')
 
 app = Flask(__name__)
 
@@ -27,6 +32,13 @@ if not os.path.exists(DB_FILE_PATH):
     with open(DB_FILE_PATH, 'w') as json_file:
         json.dump({"images": {},"faces": {},"tags": {"humans": {},"animals": {},"custom_tags": {}}}, json_file)
 
+def reconnnaissance_animal(img):
+    results = model(img)  # results list
+    for r in results:
+        im_array = r.plot()  # plot a BGR numpy array of predictions
+        im = Image.fromarray(im_array[..., ::-1])  # RGB PIL image
+        im.show()  # show image
+        im.save('results.jpg')  # save image
 
 def add_colored_box(filename, humans_data):
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
@@ -131,6 +143,8 @@ def extract_faces(filename):
             }
     except:
         pass
+
+    animals.reconnnaissance_animal(filename)
 
     # Write json
     with open(DB_FILE_PATH, 'w') as json_file:
