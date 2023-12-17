@@ -30,20 +30,17 @@ def reconnnaissance_animal(img_path, confidence_threshold=0.0):
                 # im.show()  # Show the image
                 # im.save('results.jpg')  # Save the image
 
-            formatted_coordinates = {}
+            formatted_coordinates = []
 
-            for coord,class_name in zip(detections, classes_names):
+            for coord in detections:
                 x, y, x_max, y_max = coord.tolist()
                 w = x_max - x
                 h = y_max - y
-                formatted_coordinates[tuple(coord.tolist())] =  class_name
-        return formatted_coordinates
+                formatted_coordinates.append({'x': x, 'y': y, 'w': w, 'h': h})
+        return formatted_coordinates,classes_names
 
     except Exception as e:
         print(f"Error processing image: {e}")
         return []
 
-# # Example usage:
-# image_path = 'fdfde9c6-60a9-44ca-bd80-38f2d25ad5b6.jpeg'
-# detected_boxes = reconnnaissance_animal(image_path)
-# print(detected_boxes)
+

@@ -55,6 +55,33 @@ def add_colored_box(filename, humans_data):
         box_coordinates = [(x, y), (x + w, y + h)]
 
         # Draw the colored box on the image
+        draw.rectangle(box_coordinates, outline=border_color,    width=2)
+
+    # Save the modified image to the specified file location
+    _, file_extension = os.path.splitext(file_path)
+    img.save(os.path.join(app.config['TMP_FOLDER'], "tmp_image")+file_extension)
+    return border_colors
+
+def add_colored_box_animals(filename, coords):
+    file_path = os.path.join(app.config['TMP_FOLDER'], filename)
+    img = Image.open(file_path)
+
+    # Create a drawing object
+    draw = ImageDraw.Draw(img)
+
+    border_colors = []
+
+    for animal in coords:
+        border_color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+        border_colors.append(border_color)
+        area = animal["area"]
+        print(area)
+        x, y, w, h = area['x'], area['y'], area['w'], area['h']
+
+        # Define the coordinates of the box
+        box_coordinates = [(x, y), (x + w, y + h)]
+
+        # Draw the colored box on the image
         draw.rectangle(box_coordinates, outline=border_color, width=2)
 
     # Save the modified image to the specified file location
@@ -138,13 +165,8 @@ def extract_faces(filename):
                 "from_picture": filename,
                 "human": human
             }
-            animals = reconnnaissance_animal(file_path)
-            if (len(animals) > 0) :
-                for elem in animals : 
+            
                     
-                    # add le cadre
-                    # add au json 
-                    pass
     except: 
         pass
 
@@ -163,6 +185,38 @@ def generate_random_filename(original_filename):
     _, file_extension = os.path.splitext(original_filename)
     random_filename = str(uuid.uuid4()) + file_extension
     return random_filename
+
+def animals(filename) :
+
+    # Read json
+    with open(DB_FILE_PATH, 'r') as json_file:
+        data = json.load(json_file)
+
+
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    boxes,classes = reconnnaissance_animal(file_path)
+    if (len(boxes) > 0) :
+        for box,race in zip(boxes,classes) : 
+            # Bow = {'x': x, 'y': y, 'w': w, 'h': h} 
+            # race = juste un string
+            # ajouter le cadre à l'image
+            # ajouter tag par tag au json
+            data['images'][filename]["animals"].append({
+            "race": race,
+            "area": box ,
+            })
+            #vérifier si le tag existe
+            found = False
+            if race in data["tags"]["animals"] : 
+                data['tags']['animals'][race].append(filename)
+            else : 
+                data['tags']['animals'][race] = [filename]
+
+            
+
+    with open(DB_FILE_PATH, 'w') as json_file:
+        json.dump(data, json_file, indent=2)
+    
 
 @app.route('/')
 def index():
@@ -198,7 +252,7 @@ def upload_file():
 
         # Update the JSON database with information about the new file and face
         extract_faces(random_filename)
-
+        animals(filename=random_filename)
         return redirect(url_for('index'))
     
 @app.route('/image/<image_filename>')
@@ -207,11 +261,12 @@ def display_image(image_filename):
     image_data = get_image_data(image_filename)
 
     border_colors = add_colored_box(image_filename, image_data['humans'])
-
+    
     # Render the image display template
     _, file_extension = os.path.splitext(image_filename)
     displayed_image = "tmp_image" + file_extension
-    return render_template('image.html', displayed_image = displayed_image, image_filename=image_filename, image_data=image_data, border_colors=border_colors)
+    border_colors_animals = add_colored_box_animals("tmp_image" + file_extension,image_data['animals'])
+    return render_template('image.html', displayed_image = displayed_image, image_filename=image_filename, image_data=image_data, border_colors=border_colors, border_colors_animals=border_colors_animals)
 
 # ...
 
