@@ -10,6 +10,8 @@ import shutil
 from flask import request
 from PIL import Image
 from ultralytics import YOLO
+from animals import reconnnaissance_animal
+
 
 # Load a pretrained YOLOv8n model
 model = YOLO('best.pt')
@@ -32,13 +34,7 @@ if not os.path.exists(DB_FILE_PATH):
     with open(DB_FILE_PATH, 'w') as json_file:
         json.dump({"images": {},"faces": {},"tags": {"humans": {},"animals": {},"custom_tags": {}}}, json_file)
 
-def reconnnaissance_animal(img):
-    results = model(img)  # results list
-    for r in results:
-        im_array = r.plot()  # plot a BGR numpy array of predictions
-        im = Image.fromarray(im_array[..., ::-1])  # RGB PIL image
-        im.show()  # show image
-        im.save('results.jpg')  # save image
+
 
 def add_colored_box(filename, humans_data):
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
@@ -75,6 +71,7 @@ def get_image_data(image_filename):
     image_data = data['images'].get(image_filename, {})
 
     return image_data
+
 
 def extract_faces(filename):
     # Extract faces
@@ -141,11 +138,23 @@ def extract_faces(filename):
                 "from_picture": filename,
                 "human": human
             }
-    except:
+            animals = reconnnaissance_animal(file_path)
+            if (len(animals) > 0) :
+                for elem in animals : 
+                    
+                    # add le cadre
+                    # add au json 
+                    pass
+    except: 
         pass
 
-    animals.reconnnaissance_animal(filename)
-
+    # Reconnaitre l'animal
+    # Save l'image qq part
+    # Get la race 
+    # Save dans les tags du json
+    # Supperposer les 2 images
+    
+    
     # Write json
     with open(DB_FILE_PATH, 'w') as json_file:
         json.dump(data, json_file, indent=2)
