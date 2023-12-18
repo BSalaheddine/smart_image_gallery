@@ -20,7 +20,7 @@ def add_colored_boxes(filepath, image_data, destination):
 
     border_colors = {"faces": [], "animals": []}
 
-    for human in image_data['humans']:
+    for human in image_data['faces']:
         border_color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
         border_colors["faces"].append(border_color)
 

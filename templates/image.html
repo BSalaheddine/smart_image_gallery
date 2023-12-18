@@ -24,10 +24,10 @@
 
     <img src="{{ url_for('static', filename='tmp_image/' + displayed_image) }}" alt="Image">
 
-    {% if image_data.humans %}
+    {% if image_data.faces %}
         <h2>People:</h2>
-        {% for i in range(image_data.humans|length) %}
-            {% set label_name = image_data.humans[i].name %}
+        {% for i in range(image_data.faces|length) %}
+            {% set label_name = image_data.faces[i].name %}
             <div class="face_tag" style="border-color: rgb({{ border_colors["faces"][i]|join(',') }});"><a class="label-link" href="{{ url_for('filter_by_label', label=label_name) }}">{{ label_name }}</a></div>
         {% endfor %}
     {% endif %}

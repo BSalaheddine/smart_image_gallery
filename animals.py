@@ -45,10 +45,9 @@ def reconnnaissance_animal(img_path, confidence_threshold=0.0):
         return []
 
 def find_animals(filename, filepath) :
-
     data = get_db()
-    
-    boxes,classes = reconnnaissance_animal(file_path)
+
+    boxes,classes = reconnnaissance_animal(filepath)
     if (len(boxes) > 0) :
         for area,species in zip(boxes,classes) : 
             data = add_animal_to_image(data, filename, species, area)
