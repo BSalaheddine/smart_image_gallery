@@ -4,27 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Filtered Images - {{ label }}</title>
-    <!-- Your other head content -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/filtered_images.css') }}">
 </head>
 <body>
-    <h1>Images with Label: {{ label }}</h1>
-    <form method="post" action="{{ url_for('rename_tag', label=label) }}">
-        <label for="new_tag_name">Rename Tag:</label>
-        <input type="text" name="new_tag_name" id="new_tag_name" required>
-        <button type="submit">Rename</button>
-    </form>
+    <header>
+        <h1>Smart Image Gallery</h1>
+        <nav>
+            <a class="hover" href="{{ url_for('index') }}">Home</a>
+        </nav>
+    </header>
 
-    <!-- Display the filtered images -->
-    {% for filename in image_files %}
-        <img src="{{ url_for('static', filename='uploads/' + filename) }}" alt="{{ filename }}">
-    {% endfor %}
+    <div class="images">
+        <h1>Images with Label: {{ label }}</h1>
+        <form method="post" action="{{ url_for('rename_tag', label=label) }}">
+            <label for="new_tag_name">Rename Tag:</label>
+            <input type="text" name="new_tag_name" id="new_tag_name" required>
+            <button type="submit">Rename</button>
+        </form>
 
-    <!-- Pagination links (you can adjust this based on your needs) -->
-    {% if page > 1 %}
-        <a href="{{ url_for('filter_by_label', label=label, page=page-1) }}">Previous</a>
-    {% endif %}
-    {% if page < total_pages %}
-        <a href="{{ url_for('filter_by_label', label=label, page=page+1) }}">Next</a>
-    {% endif %}
+        <ul class="image-list">
+            {% for image_file in image_files %}
+                <li class="image">
+                    <a href="{{ url_for('display_image', filename=image_file) }}">
+                        <img src="{{ url_for('static', filename='uploads/' + image_file) }}" alt="Image">
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <nav class="pagination">
+        <ul class="page-list">
+            {% for page_num in range(1, number_of_pages + 1) %}
+                <li {% if page_num == page %}class="active"{% endif %}>
+                    <a href="{{ url_for('filter_by_label', label=label, page=page_num) }}">{{ page_num }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </nav>
 </body>
 </html>

@@ -81,14 +81,19 @@ def filter_by_label(label):
         filtered_images = data['tags']['custom_tags'][label]
 
     page = request.args.get('page', 1, type=int)
-    items_per_page = 40  # 8 columns * 5 rows
+    items_per_page = 20  # 5 columns * 4 rows
     start = (page - 1) * items_per_page
     end = start + items_per_page
     paginated_files = filtered_images[start:end]
 
-    total_pages = (len(filtered_images) + items_per_page - 1) // items_per_page
+    page = request.args.get('page', 1, type=int)
+    items_per_page = 20  # 5 columns * 4 rows
+    start = (page - 1) * items_per_page
+    end = start + items_per_page
+    paginated_files = filtered_images[start:end]
+    number_of_pages = (len(filtered_images) - 1) // items_per_page + 1
 
-    return render_template('filtered_images.html', image_files=paginated_files, label=label, page=page, total_pages=total_pages)
+    return render_template('filtered_images.html', image_files=paginated_files, label=label, page=page, number_of_pages=number_of_pages)
 
 @app.route('/add_custom_label/<image_filename>', methods=['POST'])
 def add_custom_label(image_filename):

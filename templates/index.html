@@ -3,34 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Gallery</title>
+    <title>Smart Image Gallery</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style/index.css') }}">
 </head>
 <body>
-    <h1>Image Gallery</h1>
-    <form action="/upload" method="post" enctype="multipart/form-data">
-        <input type="file" name="file" accept=".png, .jpg, .jpeg, .gif" required>
-        <button type="submit">Upload</button>
-    </form>
+    <header>
+        <h1>Smart Image Gallery</h1>
+        <nav>
+            <a href="{{ url_for('index') }}">Home</a>
+        </nav>
+    </header>
 
-    <h2>Uploaded Images</h2>
-    <ul class="images">
-        {% for image_file in image_files %}
-            <li class="image">
-                <a href="{{ url_for('display_image', filename=image_file) }}">
-                    <img src="{{ url_for('static', filename='uploads/' + image_file) }}" alt="Image">
-                </a>
-            </li>
-            
-        {% endfor %}
-    </ul>
-
-    <div class="pages">
-        <ul class="page">
-            {% for page_num in range(1, number_of_pages + 1) %}
-                <li {% if page_num == page %}class="active"{% endif %}><a href="{{ url_for('index', page=page_num) }}">{{ page_num }}</a></li>
+    <section class="images">
+        <h2>Uploaded Images</h2>
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".png, .jpg, .jpeg, .gif" required>
+            <button type="submit">Upload</button>
+        </form>
+        
+        <ul class="image-list">
+            {% for image_file in image_files %}
+                <li class="image">
+                    <a href="{{ url_for('display_image', filename=image_file) }}">
+                        <img src="{{ url_for('static', filename='uploads/' + image_file) }}" alt="Image">
+                    </a>
+                </li>
             {% endfor %}
         </ul>
-    </div>
+    </section>
+
+    <nav class="pagination">
+        <ul class="page-list">
+            {% for page_num in range(1, number_of_pages + 1) %}
+                <li {% if page_num == page %}class="active"{% endif %}>
+                    <a href="{{ url_for('index', page=page_num) }}">{{ page_num }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </nav>
 </body>
 </html>
