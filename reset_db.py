@@ -1,7 +1,7 @@
 import json
 import os
 with open("db.json", 'w') as json_file:
-    json.dump({"images": {},"faces": {},"tags": {"humans": {},"animals": {},"custom_tags": {}}}, json_file)
+    json.dump({"images": {},"faces": {},"tags": {"humans": {},"animals": {},"custom_tags": {}}}, json_file, indent=2)
 
 def delete_files_in_directory(directory_path):
     for file_name in os.listdir(directory_path):

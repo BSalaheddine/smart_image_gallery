@@ -30,10 +30,20 @@ os.makedirs(app.config['TMP_UPLOAD'], exist_ok=True)
 
 # Initialize json
 DB_FILE_PATH = 'db.json'
-if not os.path.exists(DB_FILE_PATH):
-    with open(DB_FILE_PATH, 'w') as json_file:
-        json.dump({"images": {},"faces": {},"tags": {"humans": {},"animals": {},"custom_tags": {}}}, json_file)
 
+def get_db():
+    # Read the existing data from the JSON file
+    with open(DB_FILE_PATH, 'r') as json_file:
+        data = json.load(json_file)
+    return data
+
+def update_db(data):
+    with open(DB_FILE_PATH, 'w') as json_file:
+        json.dump(data, json_file, indent=2)
+
+if not os.path.exists(DB_FILE_PATH):
+    data = {"images": {},"faces": {},"tags": {"humans": {},"animals": {},"custom_tags": {}}}
+    update_db(data)
 
 
 def add_colored_box(filename, humans_data):
@@ -90,9 +100,7 @@ def add_colored_box_animals(filename, coords):
     return border_colors
 
 def get_image_data(image_filename):
-    # Read the existing data from the JSON file
-    with open(DB_FILE_PATH, 'r') as json_file:
-        data = json.load(json_file)
+    data = get_db()
 
     # Get data for the specified image
     image_data = data['images'].get(image_filename, {})
@@ -104,9 +112,7 @@ def extract_faces(filename):
     # Extract faces
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
-    # Read json
-    with open(DB_FILE_PATH, 'r') as json_file:
-        data = json.load(json_file)
+    data = get_db()
     
     # Add file to json
     data['images'][filename] = {
@@ -177,9 +183,7 @@ def extract_faces(filename):
     # Supperposer les 2 images
     
     
-    # Write json
-    with open(DB_FILE_PATH, 'w') as json_file:
-        json.dump(data, json_file, indent=2)
+    update_db(data)
 
 def generate_random_filename(original_filename):
     _, file_extension = os.path.splitext(original_filename)
@@ -188,10 +192,7 @@ def generate_random_filename(original_filename):
 
 def animals(filename) :
 
-    # Read json
-    with open(DB_FILE_PATH, 'r') as json_file:
-        data = json.load(json_file)
-
+    data = get_db()
 
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     boxes,classes = reconnnaissance_animal(file_path)
@@ -212,10 +213,7 @@ def animals(filename) :
             else : 
                 data['tags']['animals'][race] = [filename]
 
-            
-
-    with open(DB_FILE_PATH, 'w') as json_file:
-        json.dump(data, json_file, indent=2)
+    update_db(data)
     
 
 @app.route('/')
@@ -273,7 +271,7 @@ def display_image(image_filename):
 @app.route('/filter/<label>')
 def filter_by_label(label):
     # Get a list of images with the specified label
-    data = get_all_data()
+    data = get_db()
     if label in data['tags']['humans']:
         filtered_images = data['tags']['humans'][label]
     elif label in data['tags']['animals']:
@@ -293,13 +291,6 @@ def filter_by_label(label):
 
     return render_template('filtered_images.html', image_files=paginated_files, label=label, page=page, total_pages=total_pages)
 
-def get_all_data():
-    # Read the existing data from the JSON file
-    with open(DB_FILE_PATH, 'r') as json_file:
-        data = json.load(json_file)
-
-    return data
-
 @app.route('/add_custom_label/<image_filename>', methods=['POST'])
 def add_custom_label(image_filename):
     custom_label = request.form.get('custom_label')
@@ -307,7 +298,7 @@ def add_custom_label(image_filename):
     # Ensure the custom label is not empty
     if custom_label:
         # Get existing data from the JSON file
-        data = get_all_data()
+        data = get_db()
 
         # Check if the image exists in the database
         if image_filename in data['images']:
@@ -317,9 +308,7 @@ def add_custom_label(image_filename):
             # Add the custom label to the overall custom_tags in tags
             data['tags']['custom_tags'].setdefault(custom_label, []).append(image_filename)
 
-            # Write the updated data back to the JSON file
-            with open(DB_FILE_PATH, 'w') as json_file:
-                json.dump(data, json_file, indent=2)
+            update_db(data)
 
     # Redirect back to the image details page
     return redirect(url_for('display_image', image_filename=image_filename))

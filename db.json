@@ -1,1 +1,9 @@
-{"images": {}, "faces": {}, "tags": {"humans": {}, "animals": {}, "custom_tags": {}}}
+{
+  "images": {},
+  "faces": {},
+  "tags": {
+    "humans": {},
+    "animals": {},
+    "custom_tags": {}
+  }
+}
