@@ -66,7 +66,7 @@ def display_image(filename):
 
     border_colors = add_colored_boxes(file_path, image_data, tmp_file_path)
 
-    return render_template('image.html', tmp_file_path=tmp_file_path, image_filename=filename, image_data=image_data, border_colors=border_colors, displayed_image=displayed_image)
+    return render_template('image.html', tmp_file_path=tmp_file_path, filename=filename, image_data=image_data, border_colors=border_colors, displayed_image=displayed_image)
 
 # ...
 
@@ -106,7 +106,7 @@ def add_custom_label(image_filename):
 
         update_db(data)
 
-    return redirect(url_for('display_image', image_filename=image_filename))
+    return redirect(url_for('display_image', filename=image_filename))
 
 @app.route('/rename_tag/<label>', methods=['POST'])
 def rename_tag(label):
