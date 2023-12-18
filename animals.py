@@ -24,7 +24,6 @@ def reconnnaissance_animal(img_path, confidence_threshold=0.0):
                     classes_names.append(r.names[element])
                 boxes = r.boxes.xyxy if hasattr(r.boxes, 'xyxy') else r.boxes  # Try accessing 'xyxy', fallback to 'boxes'
                 for box in boxes:
-                    print("Box:", box)
                     detections.append(box)
                 # im_array = r.plot()
                 # im = Image.fromarray(im_array[..., ::-1])  # Convert BGR to RGB

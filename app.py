@@ -24,12 +24,13 @@ def index():
     image_files = [f for f in os.listdir(app.config['UPLOAD_FOLDER']) if f.endswith(('.png', '.jpg', '.jpeg', '.gif'))]
 
     page = request.args.get('page', 1, type=int)
-    items_per_page = 40  # 8 columns * 5 rows
+    items_per_page = 20  # 5 columns * 4 rows
     start = (page - 1) * items_per_page
     end = start + items_per_page
     paginated_files = image_files[start:end]
+    number_of_pages = (len(image_files) - 1) // 20 + 1
 
-    return render_template('index.html', image_files=paginated_files, page=page)
+    return render_template('index.html', image_files=paginated_files, page=page, number_of_pages=number_of_pages)
 
 @app.route('/upload', methods=['POST'])
 def upload_file():

@@ -37,8 +37,6 @@ def find_faces(filename, filepath, faces_folder):
             data = add_image_to_face(data, name, filename)
             data = add_face_to_image(data, filename, name, area, face_filename)
             data = add_face_to_db(data, face_filename, filename, name)
-
-        print("########")
                     
     except: 
         pass
