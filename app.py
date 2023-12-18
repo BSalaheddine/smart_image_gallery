@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify
 import os
 import uuid
 from deepface import DeepFace
-import cv2
 from PIL import Image, ImageDraw
 import random
 import shutil
@@ -11,6 +10,7 @@ from PIL import Image
 from ultralytics import YOLO
 from animals import reconnnaissance_animal
 from db import create_db, get_db, add_image_to_db, update_db
+from image_utils import crop_face
 
 
 # Load a pretrained YOLOv8n model
@@ -32,7 +32,6 @@ os.makedirs(app.config['TMP_UPLOAD'], exist_ok=True)
 DB_FILE_PATH = 'db.json'
 
 create_db()
-
 
 def add_colored_box(filename, humans_data):
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
@@ -114,13 +113,7 @@ def extract_faces(filename):
             facial_area = face['facial_area']
             x, y, w, h = facial_area['x'], facial_area['y'], facial_area['w'], facial_area['h']
 
-            # Save cropped face image
-            image = cv2.imread(file_path)
-            # to crop not too much (makes the recognition model less performant)
-            a, b, c, d = max(0,x-w//2), min(image.shape[1],x+w+w//2), max(0,y-h//2), min(image.shape[1],y+h+h//2)
-            new_x, new_y, new_w, new_h = a, c, b-a, d-c
-            cropped_image = image[new_y:new_y+new_h, new_x:new_x+new_w]
-            cv2.imwrite(tmp_face_path, cropped_image)
+            crop_face(file_path, tmp_face_path, x, y, w, h)
 
             found = False
             for file in os.listdir(app.config['FACES_FOLDER']):
