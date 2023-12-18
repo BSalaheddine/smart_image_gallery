@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 import os
-import json
 import uuid
 from deepface import DeepFace
 import cv2
@@ -11,6 +10,7 @@ from flask import request
 from PIL import Image
 from ultralytics import YOLO
 from animals import reconnnaissance_animal
+from db import create_db, get_db, add_image_to_db, update_db
 
 
 # Load a pretrained YOLOv8n model
@@ -31,19 +31,7 @@ os.makedirs(app.config['TMP_UPLOAD'], exist_ok=True)
 # Initialize json
 DB_FILE_PATH = 'db.json'
 
-def get_db():
-    # Read the existing data from the JSON file
-    with open(DB_FILE_PATH, 'r') as json_file:
-        data = json.load(json_file)
-    return data
-
-def update_db(data):
-    with open(DB_FILE_PATH, 'w') as json_file:
-        json.dump(data, json_file, indent=2)
-
-if not os.path.exists(DB_FILE_PATH):
-    data = {"images": {},"faces": {},"tags": {"humans": {},"animals": {},"custom_tags": {}}}
-    update_db(data)
+create_db()
 
 
 def add_colored_box(filename, humans_data):
@@ -114,12 +102,7 @@ def extract_faces(filename):
 
     data = get_db()
     
-    # Add file to json
-    data['images'][filename] = {
-        "humans" : [],
-        "animals": [],
-        "custom_tags": []
-    }
+    data = add_image_to_db(data, filename)
     
     try:
         faces = DeepFace.extract_faces(file_path, detector_backend="retinaface")
