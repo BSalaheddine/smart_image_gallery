@@ -20,7 +20,7 @@
     </style>
 </head>
 <body>
-    <h1>Image: {{ image_filename }}</h1>
+    <h1>Image: {{ filename }}</h1>
 
     <img src="{{ url_for('static', filename='tmp_image/' + displayed_image) }}" alt="Image">
 
@@ -28,14 +28,14 @@
         <h2>People:</h2>
         {% for i in range(image_data.humans|length) %}
             {% set label_name = image_data.humans[i].name %}
-            <div class="face_tag" style="border-color: rgb({{ border_colors[i]|join(',') }});"><a class="label-link" href="{{ url_for('filter_by_label', label=label_name) }}">{{ label_name }}</a></div>
+            <div class="face_tag" style="border-color: rgb({{ border_colors["faces"][i]|join(',') }});"><a class="label-link" href="{{ url_for('filter_by_label', label=label_name) }}">{{ label_name }}</a></div>
         {% endfor %}
     {% endif %}
     {% if image_data.animals %}
         <h2>Animals:</h2>
         {% for i in range(image_data.animals|length) %}
             {% set label_name = image_data.animals[i].race %}
-            <div class="face_tag" style="border-color: rgb({{ border_colors_animals[i]|join(',') }});"><a class="label-link" href="{{ url_for('filter_by_label', label=label_name) }}">{{ label_name }}</a></div>
+            <div class="face_tag" style="border-color: rgb({{ border_colors["animals"][i]|join(',') }});"><a class="label-link" href="{{ url_for('filter_by_label', label=label_name) }}">{{ label_name }}</a></div>
         {% endfor %}
     {% endif %}
     {% if image_data.custom_tags %}
@@ -47,7 +47,7 @@
     {% endif %}
 
 
-    <form method="post" action="{{ url_for('add_custom_label', image_filename=image_filename) }}">
+    <form method="post" action="{{ url_for('add_custom_label', image_filename=filename) }}">
         <label for="custom_label">Add Custom Label:</label>
         <input type="text" name="custom_label" id="custom_label" required>
         <button type="submit">Add</button>

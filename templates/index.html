@@ -17,7 +17,7 @@
     <ul>
         {% for image_file in image_files %}
             <li>
-                <a href="{{ url_for('display_image', image_filename=image_file) }}">
+                <a href="{{ url_for('display_image', filename=image_file) }}">
                     <img src="{{ url_for('static', filename='uploads/' + image_file) }}" alt="Image">
                 </a>
             </li>

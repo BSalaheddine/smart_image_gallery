@@ -10,7 +10,7 @@ from PIL import Image
 from ultralytics import YOLO
 from animals import reconnnaissance_animal
 from db import create_db, get_db, add_image_to_db, update_db
-from image_utils import crop_face
+from image_utils import crop_face, add_colored_boxes
 
 
 # Load a pretrained YOLOv8n model
@@ -33,68 +33,6 @@ DB_FILE_PATH = 'db.json'
 
 create_db()
 
-def add_colored_box(filename, humans_data):
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    img = Image.open(file_path)
-
-    # Create a drawing object
-    draw = ImageDraw.Draw(img)
-
-    border_colors = []
-
-    for human in humans_data:
-        border_color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-        border_colors.append(border_color)
-        area = human['facial_area']
-        x, y, w, h = area['x'], area['y'], area['w'], area['h']
-
-        # Define the coordinates of the box
-        box_coordinates = [(x, y), (x + w, y + h)]
-
-        # Draw the colored box on the image
-        draw.rectangle(box_coordinates, outline=border_color,    width=2)
-
-    # Save the modified image to the specified file location
-    _, file_extension = os.path.splitext(file_path)
-    img.save(os.path.join(app.config['TMP_FOLDER'], "tmp_image")+file_extension)
-    return border_colors
-
-def add_colored_box_animals(filename, coords):
-    file_path = os.path.join(app.config['TMP_FOLDER'], filename)
-    img = Image.open(file_path)
-
-    # Create a drawing object
-    draw = ImageDraw.Draw(img)
-
-    border_colors = []
-
-    for animal in coords:
-        border_color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-        border_colors.append(border_color)
-        area = animal["area"]
-        print(area)
-        x, y, w, h = area['x'], area['y'], area['w'], area['h']
-
-        # Define the coordinates of the box
-        box_coordinates = [(x, y), (x + w, y + h)]
-
-        # Draw the colored box on the image
-        draw.rectangle(box_coordinates, outline=border_color, width=2)
-
-    # Save the modified image to the specified file location
-    _, file_extension = os.path.splitext(file_path)
-    img.save(os.path.join(app.config['TMP_FOLDER'], "tmp_image")+file_extension)
-    return border_colors
-
-def get_image_data(image_filename):
-    data = get_db()
-
-    # Get data for the specified image
-    image_data = data['images'].get(image_filename, {})
-
-    return image_data
-
-
 def extract_faces(filename):
     # Extract faces
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
@@ -110,8 +48,8 @@ def extract_faces(filename):
             tmp_face_path = os.path.join(app.config['TMP_UPLOAD'], face_filename)
             face_path = os.path.join(app.config['FACES_FOLDER'], face_filename)
             
-            facial_area = face['facial_area']
-            x, y, w, h = facial_area['x'], facial_area['y'], facial_area['w'], facial_area['h']
+            area = face['facial_area']
+            x, y, w, h = area['x'], area['y'], area['w'], area['h']
 
             crop_face(file_path, tmp_face_path, x, y, w, h)
 
@@ -138,7 +76,7 @@ def extract_faces(filename):
             # Add face to image in json
             data['images'][filename]["humans"].append({
                 "name": human,
-                "facial_area": facial_area,
+                "area": area,
                 "face": face_filename
             })
 
@@ -229,18 +167,21 @@ def upload_file():
         animals(filename=random_filename)
         return redirect(url_for('index'))
     
-@app.route('/image/<image_filename>')
-def display_image(image_filename):
-    # Get data for the specified image
-    image_data = get_image_data(image_filename)
-
-    border_colors = add_colored_box(image_filename, image_data['humans'])
-    
-    # Render the image display template
-    _, file_extension = os.path.splitext(image_filename)
+@app.route('/image/<filename>')
+def display_image(filename):
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    _, file_extension = os.path.splitext(filename)
+    tmp_file_path = os.path.join(app.config['TMP_FOLDER'], "tmp_image")+file_extension
     displayed_image = "tmp_image" + file_extension
-    border_colors_animals = add_colored_box_animals("tmp_image" + file_extension,image_data['animals'])
-    return render_template('image.html', displayed_image = displayed_image, image_filename=image_filename, image_data=image_data, border_colors=border_colors, border_colors_animals=border_colors_animals)
+
+    print(tmp_file_path)
+
+    data = get_db()
+    image_data = data['images'][filename]
+
+    border_colors = add_colored_boxes(file_path, image_data, tmp_file_path)
+
+    return render_template('image.html', tmp_file_path=tmp_file_path, image_filename=filename, image_data=image_data, border_colors=border_colors, displayed_image=displayed_image)
 
 # ...
 
