@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for
 import os
 from flask import request
 from animals import find_animals
-from db import create_db, get_db, update_db, add_custom_tag_to_image, replace_in_db
+from db import create_db, get_db, update_db, add_custom_tag_to_image, replace_in_db, get_all_tags
 from image_utils import add_colored_boxes
 from faces import find_faces, generate_random_filename
 
@@ -30,7 +30,9 @@ def index():
     paginated_files = image_files[start:end]
     number_of_pages = (len(image_files) - 1) // 20 + 1
 
-    return render_template('index.html', image_files=paginated_files, page=page, number_of_pages=number_of_pages)
+    all_labels = get_all_tags()
+
+    return render_template('index.html', image_files=paginated_files, page=page, number_of_pages=number_of_pages, all_labels=all_labels)
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -93,7 +95,9 @@ def filter_by_label(label):
     paginated_files = filtered_images[start:end]
     number_of_pages = (len(filtered_images) - 1) // items_per_page + 1
 
-    return render_template('filtered_images.html', image_files=paginated_files, label=label, page=page, number_of_pages=number_of_pages)
+    all_labels = get_all_tags()
+
+    return render_template('filtered_images.html', image_files=paginated_files, label=label, page=page, number_of_pages=number_of_pages, all_labels=all_labels)
 
 @app.route('/add_custom_label/<image_filename>', methods=['POST'])
 def add_custom_label(image_filename):

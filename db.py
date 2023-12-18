@@ -14,6 +14,10 @@ def get_db():
         data = json.load(json_file)
     return data
 
+def get_all_tags():
+    data = get_db()
+    return list(data['tags']['faces']) + list(data['tags']['animals']) + list(data['tags']['custom_tags'])
+
 def add_image_to_db(data, filename):
     data['images'][filename] = {
         "faces" : [],

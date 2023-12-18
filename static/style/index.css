@@ -148,3 +148,50 @@ nav a {
 nav a:hover {
     background-color: #0056b3;
 }
+
+/* Add this to your existing CSS file */
+
+.dropdown {
+    display: inline-block;
+}
+
+.dropbtn {
+    padding: 10px 15px;
+    background-color: #fff;
+    color: #007BFF;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+}
+
+.dropbtn:hover {
+    background-color: #007BFF;
+    color: #fff;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+.dropdown-content a {
+    color: #333;
+    padding: 12px 16px;
+    display: block;
+    text-decoration: none;
+    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+}
+
+.dropdown-content a:hover {
+    background-color: #007BFF;
+    color: #fff;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}

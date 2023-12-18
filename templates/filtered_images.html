@@ -11,6 +11,14 @@
         <h1>Smart Image Gallery</h1>
         <nav>
             <a class="hover" href="{{ url_for('index') }}">Home</a>
+            <div class="dropdown">
+                <button class="dropbtn">Filter by Label</button>
+                <div class="dropdown-content">
+                    {% for label in all_labels %}
+                        <a href="{{ url_for('filter_by_label', label=label) }}">{{ label }}</a>
+                    {% endfor %}
+                </div>
+            </div>
         </nav>
     </header>
 
