@@ -8,8 +8,8 @@ import shutil
 from flask import request
 from PIL import Image
 from ultralytics import YOLO
-from animals import reconnnaissance_animal
-from db import create_db, get_db, add_image_to_db, update_db
+from animals import find_animals
+from db import create_db, get_db, add_image_to_db, update_db, add_image_to_species, add_animal_to_image
 from image_utils import crop_face, add_colored_boxes
 
 
@@ -33,7 +33,7 @@ DB_FILE_PATH = 'db.json'
 
 create_db()
 
-def extract_faces(filename):
+def find_faces(filename):
     # Extract faces
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
@@ -104,32 +104,6 @@ def generate_random_filename(original_filename):
     random_filename = str(uuid.uuid4()) + file_extension
     return random_filename
 
-def animals(filename) :
-
-    data = get_db()
-
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    boxes,classes = reconnnaissance_animal(file_path)
-    if (len(boxes) > 0) :
-        for box,race in zip(boxes,classes) : 
-            # Bow = {'x': x, 'y': y, 'w': w, 'h': h} 
-            # race = juste un string
-            # ajouter le cadre à l'image
-            # ajouter tag par tag au json
-            data['images'][filename]["animals"].append({
-            "race": race,
-            "area": box ,
-            })
-            #vérifier si le tag existe
-            found = False
-            if race in data["tags"]["animals"] : 
-                data['tags']['animals'][race].append(filename)
-            else : 
-                data['tags']['animals'][race] = [filename]
-
-    update_db(data)
-    
-
 @app.route('/')
 def index():
     # Get a list of uploaded image files
@@ -155,16 +129,13 @@ def upload_file():
         return redirect(request.url)
 
     if file:
-        # Generate a random filename to avoid duplicates
         random_filename = generate_random_filename(file.filename)
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], random_filename)
-
-        # Save the uploaded file with the random filename
         file.save(file_path)
 
-        # Update the JSON database with information about the new file and face
-        extract_faces(random_filename)
-        animals(filename=random_filename)
+        find_faces(random_filename)
+        find_animals(random_filename, file_path)
+
         return redirect(url_for('index'))
     
 @app.route('/image/<filename>')

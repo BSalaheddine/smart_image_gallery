@@ -22,6 +22,20 @@ def add_image_to_db(data, filename):
     }
     return data
 
+def add_image_to_species(data, species, image):
+    if species in data["tags"]["animals"] : 
+        data['tags']['animals'][species].append(image)
+    else : 
+        data['tags']['animals'][species] = [image]
+    return data
+
+def add_animal_to_image(data, image, species, area):
+    data['images'][image]["animals"].append({
+        "species": species,
+        "area": area
+        })
+    return data
+
 def update_db(data):
     with open(DB_FILE_PATH, 'w') as json_file:
         json.dump(data, json_file, indent=2)
