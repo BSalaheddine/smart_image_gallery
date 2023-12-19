@@ -142,14 +142,7 @@ nav a {
     background-color: #007BFF;
     color: #fff;
     border-radius: 5px;
-    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
 }
-
-nav a:hover {
-    background-color: #0056b3;
-}
-
-/* Add this to your existing CSS file */
 
 .dropdown {
     display: inline-block;
@@ -180,7 +173,9 @@ nav a:hover {
 }
 
 .dropdown-content a {
-    color: #333;
+    background-color: #fff;
+    color: #007BFF;
+    /* color: #333; */
     padding: 12px 16px;
     display: block;
     text-decoration: none;
