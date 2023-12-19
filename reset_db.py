@@ -14,6 +14,6 @@ def delete_files_in_directory(directory_path):
             except Exception as e:
                 print(f"Error deleting {file_path}: {e}")
 
-directories = ["static/faces", "static/tmp_image", "static/tmp_upload", "static/uploads"]
+directories = ["static/faces", "static/tmp_image", "static/uploads"]
 for directory in directories:
     delete_files_in_directory(directory)
