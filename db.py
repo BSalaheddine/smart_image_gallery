@@ -34,10 +34,10 @@ def add_face_to_db(data, face_filename, filename, name):
     return data
 
 def add_image_to_species(data, species, image):
-    if species in data['tags']['animals'] : 
-        data['tags']['animals'][species].append(image)
-    else : 
+    if species not in data['tags']['animals']:
         data['tags']['animals'][species] = [image]
+    elif image not in data['tags']['animals'][species]:
+        data['tags']['animals'][species].append(image)
     return data
 
 def add_image_to_face(data, face, image):
