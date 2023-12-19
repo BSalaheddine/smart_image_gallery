@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style/image.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 </head>
 <body>
     <header>
@@ -16,6 +17,7 @@
 
     <div class="image-container">
         <img class="image" src="{{ url_for('static', filename='tmp_image/' + displayed_image) }}" alt="Image">
+        <img class="image" id="originalImage" src="{{ url_for('static', filename='uploads/' + filename) }}" alt="Original Image" style="display: none;">
     </div>
 
     <div class="label-container">
@@ -47,6 +49,10 @@
                     </div>
                 {% endfor %}
             {% endif %}
+            <label id="toggle-label">
+                <input type="checkbox" id="toggleImage" checked>
+                Show Bounding Boxes
+            </label>
         </div>
 
         <form method="post" action="{{ url_for('add_custom_label', image_filename=filename) }}">
@@ -55,5 +61,17 @@
             <button type="submit">Add</button>
         </form>
     </div>
+    <script>
+        $('#toggleImage').change(function() {
+            var showOriginal = !this.checked;
+            if (showOriginal) {
+                $('#originalImage').show();
+                $('.image:not(#originalImage)').hide();
+            } else {
+                $('.image:not(#originalImage)').show();
+                $('#originalImage').hide();
+            }
+        });
+    </script>
 </body>
 </html>
