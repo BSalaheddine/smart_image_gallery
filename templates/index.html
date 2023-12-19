@@ -24,7 +24,7 @@
     </header>
 
     <section class="images">
-        <h2>Uploaded Images</h2>
+        <h2>Upload New Images</h2>
         <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
             <input type="file" name="file" accept=".png, .jpg, .jpeg, .gif" required>
             <button type="submit" onclick="uploadFile()">Upload</button>
@@ -34,6 +34,7 @@
             <img src="{{ url_for('static', filename='website_images/loading.gif') }}" alt="Loading Spinner">
         </div>
         
+        <h2>Uploaded Images</h2>
         <ul class="image-list">
             {% for image_file in image_files %}
                 <li class="image">
