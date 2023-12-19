@@ -24,8 +24,8 @@
                 <h2>People:</h2>
                 {% for i in range(image_data.faces|length) %}
                     {% set label_name = image_data.faces[i].name %}
-                    <div class="face-tag" style="border-color: rgb({{ border_colors["faces"][i]|join(',') }});">
-                        <a class="label-link" href="{{ url_for('filter_by_label', label=label_name) }}">{{ label_name }}</a>
+                    <div class="area-tag" style="border-color: rgb({{ border_colors["faces"][i]|join(',') }});">
+                        <a class="label-link" style="color: rgb({{ border_colors["faces"][i]|join(',') }});" href="{{ url_for('filter_by_label', label=label_name) }}">{{ label_name }}</a>
                     </div>
                 {% endfor %}
             {% endif %}
@@ -33,8 +33,8 @@
                 <h2>Animals:</h2>
                 {% for i in range(image_data.animals|length) %}
                     {% set label_name = image_data.animals[i].species %}
-                    <div class="face-tag" style="border-color: rgb({{ border_colors["animals"][i]|join(',') }});">
-                        <a class="label-link" href="{{ url_for('filter_by_label', label=label_name) }}">{{ label_name }}</a>
+                    <div class="area-tag" style="border-color: rgb({{ border_colors["animals"][i]|join(',') }});">
+                        <a class="label-link" style="color: rgb({{ border_colors["animals"][i]|join(',') }});" href="{{ url_for('filter_by_label', label=label_name) }}">{{ label_name }}</a>
                     </div>
                 {% endfor %}
             {% endif %}

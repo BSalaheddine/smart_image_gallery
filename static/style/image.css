@@ -57,24 +57,31 @@ nav a:hover {
     padding-left: 20px;
 }
 
-.face-tag, .tag {
+.area-tag, .tag {
     border: 2px solid;
     padding: 4px;
     margin: 2px;
-    display: inline-block;
+    display: flex;
     font-size: 14px;
     border-radius: 3px;
     transition: border-radius 0.3s ease-in-out;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
 }
 
-.face-tag:hover, .tag:hover {
+.tag {
+    border-color: #5a5f63;
+}
+
+.area-tag:hover, .tag:hover {
     border-radius: 15px;
 }
 
 .label-link {
     cursor: pointer;
-    color: blue;
-    text-decoration: underline;
+    color: #5a5f63;
+    text-decoration: solid;
 }
 
 form {
