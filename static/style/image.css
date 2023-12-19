@@ -63,6 +63,12 @@ nav a:hover {
     margin: 2px;
     display: inline-block;
     font-size: 14px;
+    border-radius: 3px;
+    transition: border-radius 0.3s ease-in-out;
+}
+
+.face-tag:hover, .tag:hover {
+    border-radius: 15px;
 }
 
 .label-link {

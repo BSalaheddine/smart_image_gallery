@@ -87,6 +87,7 @@ img {
     list-style: none;
     padding: 0;
     justify-content: center;
+    margin-top: 20px;
 }
 
 .pagination a {
@@ -99,10 +100,6 @@ img {
     cursor: pointer;
     background-color: #fff;
     transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
-}
-
-.pagination {
-    margin-top: 20px;
 }
 
 .page-list {

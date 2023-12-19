@@ -12,7 +12,7 @@
         <nav>
             <a class="hover" href="{{ url_for('index') }}">Home</a>
             <div class="dropdown">
-                <button class="dropbtn">Filter by Label</button>
+                <button class="dropbtn">Filter by Label: {{ label }}</button>
                 <div class="dropdown-content">
                     {% for label in all_labels %}
                         <a href="{{ url_for('filter_by_label', label=label) }}">{{ label }}</a>
