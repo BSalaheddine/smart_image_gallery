@@ -75,12 +75,14 @@ def display_image(filename):
 @app.route('/filter/<label>')
 def filter_by_label(label):
     data = get_db()
+    custom = False
     if label in data['tags']['faces']:
         filtered_images = data['tags']['faces'][label]
     elif label in data['tags']['animals']:
         filtered_images = data['tags']['animals'][label]
     elif label in data['tags']['custom_tags']:
         filtered_images = data['tags']['custom_tags'][label]
+        custom = True
 
     page = request.args.get('page', 1, type=int)
     items_per_page = 20  # 5 columns * 4 rows
@@ -97,7 +99,7 @@ def filter_by_label(label):
 
     all_labels = get_all_tags()
 
-    return render_template('filtered_images.html', image_files=paginated_files, label=label, page=page, number_of_pages=number_of_pages, all_labels=all_labels)
+    return render_template('filtered_images.html', image_files=paginated_files, label=label, page=page, number_of_pages=number_of_pages, all_labels=all_labels, custom=custom)
 
 @app.route('/add_custom_label/<image_filename>', methods=['POST'])
 def add_custom_label(image_filename):
