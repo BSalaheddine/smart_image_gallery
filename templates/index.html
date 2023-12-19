@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Image Gallery</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style/index.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 </head>
 <body>
     <header>
@@ -24,10 +25,14 @@
 
     <section class="images">
         <h2>Uploaded Images</h2>
-        <form action="/upload" method="post" enctype="multipart/form-data">
+        <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
             <input type="file" name="file" accept=".png, .jpg, .jpeg, .gif" required>
-            <button type="submit">Upload</button>
+            <button type="submit" onclick="uploadFile()">Upload</button>
         </form>
+
+        <div id="loading" style="display: none;">
+            <img src="{{ url_for('static', filename='website_images/loading.gif') }}" alt="Loading Spinner">
+        </div>
         
         <ul class="image-list">
             {% for image_file in image_files %}
@@ -49,5 +54,31 @@
             {% endfor %}
         </ul>
     </nav>
+    <script>
+        function uploadFile() {
+            $('#loading').show();
+
+            var formData = new FormData($('#uploadForm')[0]);
+
+            $.ajax({
+                url: '/upload',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    $('#loading').hide();
+
+                    window.location.href = '/';
+                },
+                error: function(error) {
+                    console.error('Error:', error);
+                    $('#loading').hide();
+                }
+            });
+
+            event.preventDefault();
+        }
+    </script>
 </body>
 </html>
