@@ -77,7 +77,7 @@ def remove_custom_tag(data, custom_tag):
     return data
 
 def remove_custom_tag_from_image(data, image, custom_tag):
-    data[image]['custom_tags'].remove(custom_tag)
+    data['images'][image]['custom_tags'].remove(custom_tag)
     data['tags']['custom_tags'][custom_tag].remove(image)
     if not data['tags']['custom_tags'][custom_tag]:
         del data['tags']['custom_tags'][custom_tag]

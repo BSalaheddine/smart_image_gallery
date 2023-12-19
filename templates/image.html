@@ -46,6 +46,9 @@
                     {% set label_name = image_data.custom_tags[i] %}
                     <div class="tag">
                         <a class="label-link" href="{{ url_for('filter_by_label', label=label_name) }}">{{ label_name }}</a>
+                        <form class="delete_tag" action="{{ url_for('remove_tag', image=filename, label=label_name) }}" method="post">
+                            <button type="submit" class="delete-button">X</button>
+                        </form>
                     </div>
                 {% endfor %}
             {% endif %}

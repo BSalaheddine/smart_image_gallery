@@ -128,5 +128,13 @@ def delete_tag(label):
     update_db(data)
     return redirect(url_for('index'))
 
+@app.route('/remove_tag/<image>', methods=['POST'])
+def remove_tag(image):
+    label = request.args.get('label', type=str)
+    data = get_db()
+    remove_custom_tag_from_image(data, image, label)
+    update_db(data)
+    return redirect(url_for('display_image', filename=image))
+
 if __name__ == '__main__':
     app.run(debug=True)
