@@ -29,6 +29,9 @@
             <input type="text" name="new_tag_name" id="new_tag_name" required>
             <button type="submit">Rename</button>
         </form>
+        <form action="{{ url_for('delete_tag', label=label) }}" method="post">
+            <button type="submit">Delete Tag</button>
+        </form>
 
         <ul class="image-list">
             {% for image_file in image_files %}

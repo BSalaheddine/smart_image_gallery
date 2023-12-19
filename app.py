@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for
 import os
 from flask import request
 from animals import find_animals
-from db import create_db, get_db, update_db, add_custom_tag_to_image, replace_in_db, get_all_tags
+from db import create_db, get_db, update_db, add_custom_tag_to_image, replace_in_db, get_all_tags, remove_custom_tag, remove_custom_tag_from_image
 from image_utils import add_colored_boxes
 from faces import find_faces, generate_random_filename
 
@@ -120,6 +120,13 @@ def rename_tag(label):
         replace_in_db(label, new_tag_name)
 
     return redirect(url_for('filter_by_label', label=new_tag_name))
+
+@app.route('/delete_tag/<label>', methods=['POST'])
+def delete_tag(label):
+    data = get_db()
+    remove_custom_tag(data, label)
+    update_db(data)
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     app.run(debug=True)

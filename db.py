@@ -70,6 +70,19 @@ def add_custom_tag_to_image(data, image, custom_tag):
     data['images'][image]['custom_tags'].append(custom_tag)
     return data
 
+def remove_custom_tag(data, custom_tag):
+    for image in data['tags']['custom_tags'][custom_tag]:
+        data['images'][str(image)]['custom_tags'].remove(custom_tag)
+    del data['tags']['custom_tags'][custom_tag]
+    return data
+
+def remove_custom_tag_from_image(data, image, custom_tag):
+    data[image]['custom_tags'].remove(custom_tag)
+    data['tags']['custom_tags'][custom_tag].remove(image)
+    if not data['tags']['custom_tags'][custom_tag]:
+        del data['tags']['custom_tags'][custom_tag]
+    return data
+
 def update_db(data):
     with open(DB_FILE_PATH, 'w') as json_file:
         json.dump(data, json_file, indent=2)
