@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filtered Images - {{ label }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/filtered_images.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Smart Image Gallery</h1>
+        <nav>
+            <a class="hover" href="{{ url_for('index') }}">Home</a>
+            <div class="dropdown">
+                <button class="dropbtn">Filter by Label: {{ label }}</button>
+                <div class="dropdown-content">
+                    {% for label in all_labels %}
+                        <a href="{{ url_for('filter_by_label', label=label) }}">{{ label }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="images">
+        <h1>Images with Label: {{ label }}</h1>
+        <form method="post" action="{{ url_for('rename_tag', label=label) }}">
+            <label for="new_tag_name">Rename Tag:</label>
+            <input type="text" name="new_tag_name" id="new_tag_name" required>
+            <button type="submit">Rename</button>
+        </form>
+        {% if custom %}
+        <form action="{{ url_for('delete_tag', label=label) }}" method="post">
+            <button type="submit">Delete Tag</button>
+        </form>
+        {% endif %}
+
+        <ul class="image-list">
+            {% for image_file in image_files %}
+                <li class="image">
+                    <a href="{{ url_for('display_image', filename=image_file) }}">
+                        <img src="{{ url_for('static', filename='uploads/' + image_file) }}" alt="Image">
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <nav class="pagination">
+        <ul class="page-list">
+            {% for page_num in range(1, number_of_pages + 1) %}
+                <li {% if page_num == page %}class="active"{% endif %}>
+                    <a href="{{ url_for('filter_by_label', label=label, page=page_num) }}">{{ page_num }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </nav>
+</body>
+</html>

@@ -1,7 +1,10 @@
-[
-    {
-        "name": "static/uploads/4.jpg",
-        "path": null,
-        "tags": []
-    }
-]
+{
+  "images": {},
+  "faces": {},
+  "tags": {
+    "faces": {},
+    "animals": {},
+    "custom_tags": {}
+  }
+}
+

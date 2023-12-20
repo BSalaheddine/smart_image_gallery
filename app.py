@@ -1,136 +1,147 @@
-from flask import Flask, request, redirect, url_for, jsonify, render_template
-from werkzeug.utils import secure_filename
+from flask import Flask, render_template, request, redirect, url_for
 import os
-import imageProccesing as imageProccesing
+from flask import request
+from animals import find_animals
+from db import create_db, get_db, update_db, add_custom_tag_to_image, replace_in_db, get_all_tags, remove_custom_tag, remove_custom_tag_from_image
+from image_utils import add_colored_boxes
+from faces import find_faces, generate_random_filename
 import shutil
-import json
 
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'static/uploads/'
 
-def get_next_image_number(json_file_path):
-    try:
-        with open(json_file_path, 'r') as file:
-            data = json.load(file)
-            last_image_name = data['name']
-            last_number = int(os.path.splitext(last_image_name)[0])
-            return last_number + 1
-    except (FileNotFoundError, json.JSONDecodeError, KeyError, ValueError):
-        return 1
+# Initialize folders
+app.config['UPLOAD_FOLDER'] = os.path.join('static', 'uploads')
+app.config['FACES_FOLDER'] = os.path.join('static', 'faces')
+app.config['TMP_FOLDER'] = os.path.join('static', 'tmp_image')
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+os.makedirs(app.config['FACES_FOLDER'], exist_ok=True)
+os.makedirs(app.config['TMP_FOLDER'], exist_ok=True)
 
-def update_json_file(json_file_path, new_image_name, new_image_path, tag=None):
-    try:
-        with open(json_file_path, 'r+') as file:
-            data = json.load(file)
-            if tag:  # If a tag is provided, append it to the tags list for the image
-                for image in data:
-                    if image['name'] == new_image_name:
-                        image['tags'].append(tag)
-                        break
-            else:  # If no tag, add the new image to the database
-                data.append({
-                    'name': new_image_name,
-                    'path': new_image_path,
-                    'tags': []
-                })
-            file.seek(0)  # Reset file position to the beginning.
-            json.dump(data, file, indent=4)
-            file.truncate()  # Remove any remaining data from the old content.
-    except (FileNotFoundError, json.JSONDecodeError):
-        # If the file does not exist or is empty/invalid, create a new list
-        data = [{
-            'name': new_image_name,
-            'path': new_image_path,
-            'tags': []
-        }]
-        with open(json_file_path, 'w') as file:
-            json.dump(data, file, indent=4)
+create_db()
 
-@app.route('/', methods=['GET', 'POST'])
-def galerie():
-    if request.method == 'POST':
-        image_file = request.files['file']
-        if image_file:
-            filename = secure_filename(image_file.filename)
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            image_file.save(file_path)
+@app.route('/')
+def index():
+    image_files = [f for f in os.listdir(app.config['UPLOAD_FOLDER']) if f.endswith(('.png', '.jpg', '.jpeg', '.gif'))]
 
-            recognition = imageProccesing.reconnaissance(file_path)
+    page = request.args.get('page', 1, type=int)
+    items_per_page = 20  # 5 columns * 4 rows
+    start = (page - 1) * items_per_page
+    end = start + items_per_page
+    paginated_files = image_files[start:end]
+    number_of_pages = (len(image_files) - 1) // 20 + 1
 
-            json_file_path = 'db.json'
-            next_image_number = get_next_image_number(json_file_path)
-            new_filename = str(next_image_number) + os.path.splitext(filename)[1]
-            new_file_path = os.path.join(app.config['UPLOAD_FOLDER'], new_filename)
+    all_labels = get_all_tags()
 
-            if recognition == 0:
-                pass
-            else:
-                recog_path = os.path.dirname(recognition)
+    return render_template('index.html', image_files=paginated_files, page=page, number_of_pages=number_of_pages, all_labels=all_labels)
 
-            update_json_file(json_file_path, new_filename, new_file_path)
-        return redirect('/')
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        return redirect(request.url)
 
-    images = os.listdir(app.config['UPLOAD_FOLDER'])
-    images = [os.path.join('static/uploads/', file) for file in images]
+    file = request.files['file']
 
-    return render_template('galerie.html', images=images)
+    if file.filename == '':
+        return redirect(request.url)
 
+    if file:
+        random_filename = generate_random_filename(file.filename)
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], random_filename)
+        file.save(file_path)
 
-@app.route('/add-tag', methods=['POST'])
-def add_tag():
-    tag = request.form['tag']
-    image_name = request.form['image']
-    json_file_path = 'db.json'
+        find_faces(random_filename, file_path, app.config['FACES_FOLDER'])
+        find_animals(random_filename, file_path)
+
+        return redirect(url_for('index'))
     
-    if tag and image_name:
-        update_json_file(json_file_path, image_name, None, tag)
-        return jsonify({'status': 'success'})
-    else:
-        return jsonify({'status': 'failure'}), 400
+@app.route('/image/<filename>')
+def display_image(filename):
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    _, file_extension = os.path.splitext(filename)
+    tmp_file_path = os.path.join(app.config['TMP_FOLDER'], "tmp_image")+file_extension
+    displayed_image = "tmp_image" + file_extension
 
-# @app.route('/', methods=['GET', 'POST'])
-# def galerie():
-#     if request.method == 'POST':
-#         image_file = request.files['file']
-#         if image_file:
-#             filename = secure_filename(image_file.filename)
-#             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-#             image_file.save(file_path)
-#             recognition = imageProccesing.reconnaissance(file_path)
+    print(tmp_file_path)
 
-#             if recognition == 0:
-#                 unique_filename = str(uuid.uuid4()) + os.path.splitext(filename)[1]
-#                 unique_folder = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename.split('.')[0])
-#                 os.makedirs(unique_folder, exist_ok=True)
+    data = get_db()
+    if filename in data['images']:
+        image_data = data['images'][filename]
+        border_colors = add_colored_boxes(file_path, image_data, tmp_file_path)
+    else :
+        image_data = None
+        border_colors = None
+        shutil.copy(file_path, tmp_file_path)
 
-#                 shutil.copy(file_path, os.path.join(unique_folder, unique_filename))
+    return render_template('image.html', tmp_file_path=tmp_file_path, filename=filename, image_data=image_data, border_colors=border_colors, displayed_image=displayed_image)
 
-#                 return redirect('/')
-#             else :
-#                 recognition
-#                 recog_path= os.path.dirname(recognition)
-#                 shutil.copy(file_path, os.path.join(recog_path, unique_filename))
+# ...
 
-#     images = os.listdir(app.config['UPLOAD_FOLDER'])
-#     images = [os.path.join('/static/uploads/', file) for file in images]
-#     return render_template('galerie.html', images=images)
+@app.route('/filter/<label>')
+def filter_by_label(label):
+    data = get_db()
+    custom = False
+    if label in data['tags']['faces']:
+        filtered_images = data['tags']['faces'][label]
+    elif label in data['tags']['animals']:
+        filtered_images = data['tags']['animals'][label]
+    elif label in data['tags']['custom_tags']:
+        filtered_images = data['tags']['custom_tags'][label]
+        custom = True
 
-@app.route('/submitname', methods=['POST'])
-def submit_name():
-    name = request.form['name']
-    filename = request.form['filename']
-    original_file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    
-    if name and os.path.exists(original_file_path):
-        name_folder = os.path.join(app.config['UPLOAD_FOLDER'], name)
-        if not os.path.exists(name_folder):
-            os.makedirs(name_folder)
-        
-        new_file_path = os.path.join(name_folder, filename)
-        os.rename(original_file_path, new_file_path)
-    
-    return redirect('/')
+    page = request.args.get('page', 1, type=int)
+    items_per_page = 20  # 5 columns * 4 rows
+    start = (page - 1) * items_per_page
+    end = start + items_per_page
+    paginated_files = filtered_images[start:end]
+
+    page = request.args.get('page', 1, type=int)
+    items_per_page = 20  # 5 columns * 4 rows
+    start = (page - 1) * items_per_page
+    end = start + items_per_page
+    paginated_files = filtered_images[start:end]
+    number_of_pages = (len(filtered_images) - 1) // items_per_page + 1
+
+    all_labels = get_all_tags()
+
+    return render_template('filtered_images.html', image_files=paginated_files, label=label, page=page, number_of_pages=number_of_pages, all_labels=all_labels, custom=custom)
+
+@app.route('/add_custom_label/<image_filename>', methods=['POST'])
+def add_custom_label(image_filename):
+    custom_label = request.form.get('custom_label')
+
+    if custom_label:
+        data = get_db()
+
+        add_custom_tag_to_image(data, image_filename, custom_label)
+
+        update_db(data)
+
+    return redirect(url_for('display_image', filename=image_filename))
+
+@app.route('/rename_tag/<label>', methods=['POST'])
+def rename_tag(label):
+    new_tag_name = request.form.get('new_tag_name')
+
+    if new_tag_name:
+        replace_in_db(label, new_tag_name)
+
+    return redirect(url_for('filter_by_label', label=new_tag_name))
+
+@app.route('/delete_tag/<label>', methods=['POST'])
+def delete_tag(label):
+    data = get_db()
+    remove_custom_tag(data, label)
+    update_db(data)
+    return redirect(url_for('index'))
+
+@app.route('/remove_tag/<image>', methods=['POST'])
+def remove_tag(image):
+    label = request.args.get('label', type=str)
+    data = get_db()
+    remove_custom_tag_from_image(data, image, label)
+    update_db(data)
+    return redirect(url_for('display_image', filename=image))
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5002)
+    app.run(debug=True)

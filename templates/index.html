@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Image Gallery</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/index.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Smart Image Gallery</h1>
+        <nav>
+            <a href="{{ url_for('index') }}">Home</a>
+            <div class="dropdown">
+                <button class="dropbtn">Filter by Label</button>
+                <div class="dropdown-content">
+                    <input type="text" id="labelSearch" placeholder="Search labels">
+                    {% for label in all_labels %}
+                        <a href="{{ url_for('filter_by_label', label=label) }}">{{ label }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <section class="images">
+        <h2>Upload New Images</h2>
+        <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
+            <input type="file" name="file" accept=".png, .jpg, .jpeg, .gif" required>
+            <button type="submit" onclick="uploadFile()">Upload</button>
+        </form>
+
+        <div id="loading" style="display: none;">
+            <img src="{{ url_for('static', filename='website_images/loading.gif') }}" alt="Loading Spinner">
+        </div>
+        
+        <h2>Uploaded Images</h2>
+        <ul class="image-list">
+            {% for image_file in image_files %}
+                <li class="image">
+                    <a href="{{ url_for('display_image', filename=image_file) }}">
+                        <img src="{{ url_for('static', filename='uploads/' + image_file) }}" alt="Image">
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    <nav class="pagination">
+        <ul class="page-list">
+            {% for page_num in range(1, number_of_pages + 1) %}
+                <li {% if page_num == page %}class="active"{% endif %}>
+                    <a href="{{ url_for('index', page=page_num) }}">{{ page_num }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </nav>
+    <script>
+        function uploadFile() {
+            $('#loading').show();
+
+            var formData = new FormData($('#uploadForm')[0]);
+
+            $.ajax({
+                url: '/upload',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    $('#loading').hide();
+
+                    window.location.href = '/';
+                },
+                error: function(error) {
+                    console.error('Error:', error);
+                    $('#loading').hide();
+                }
+            });
+
+            event.preventDefault();
+        }
+        document.getElementById('labelSearch').addEventListener('input', function () {
+            var input, filter, a, i;
+            input = document.getElementById('labelSearch');
+            filter = input.value.toUpperCase();
+            a = document.getElementsByClassName('dropdown-content')[0].getElementsByTagName('a');
+            for (i = 0; i < a.length; i++) {
+                if (a[i].innerHTML.toUpperCase().indexOf(filter) > -1) {
+                    a[i].style.display = '';
+                } else {
+                    a[i].style.display = 'none';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
