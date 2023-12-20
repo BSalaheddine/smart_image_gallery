@@ -1,5 +1,11 @@
 {
-  "images": {},
+  "images": {
+    "462b09b3-e0c9-4201-a502-2ce7ed77f340.png": {
+      "faces": [],
+      "animals": [],
+      "custom_tags": []
+    }
+  },
   "faces": {},
   "tags": {
     "faces": {},
@@ -7,4 +13,3 @@
     "custom_tags": {}
   }
 }
-
