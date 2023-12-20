@@ -20,6 +20,7 @@
         <img class="image" id="originalImage" src="{{ url_for('static', filename='uploads/' + filename) }}" alt="Original Image" style="display: none;">
     </div>
 
+    {% if image_data != None %}
     <div class="label-container">
         <div class="label-section">
             {% if image_data.faces %}
@@ -64,6 +65,7 @@
             <button type="submit">Add</button>
         </form>
     </div>
+    {% endif %}
     <script>
         $('#toggleImage').change(function() {
             var showOriginal = !this.checked;

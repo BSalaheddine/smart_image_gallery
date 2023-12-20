@@ -5,6 +5,7 @@ from animals import find_animals
 from db import create_db, get_db, update_db, add_custom_tag_to_image, replace_in_db, get_all_tags, remove_custom_tag, remove_custom_tag_from_image
 from image_utils import add_colored_boxes
 from faces import find_faces, generate_random_filename
+import shutil
 
 
 app = Flask(__name__)
@@ -64,9 +65,13 @@ def display_image(filename):
     print(tmp_file_path)
 
     data = get_db()
-    image_data = data['images'][filename]
-
-    border_colors = add_colored_boxes(file_path, image_data, tmp_file_path)
+    if filename in data['images']:
+        image_data = data['images'][filename]
+        border_colors = add_colored_boxes(file_path, image_data, tmp_file_path)
+    else :
+        image_data = None
+        border_colors = None
+        shutil.copy(file_path, tmp_file_path)
 
     return render_template('image.html', tmp_file_path=tmp_file_path, filename=filename, image_data=image_data, border_colors=border_colors, displayed_image=displayed_image)
 
